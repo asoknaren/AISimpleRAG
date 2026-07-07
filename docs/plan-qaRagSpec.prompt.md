@@ -24,9 +24,11 @@ The system does not include:
 - Generate embeddings for question text using sentence-transformers.
 - Recompute the embedding whenever the question changes.
 - Search by question text using cosine similarity.
-- Return the top 5 matches with similarity greater than or equal to 0.85.
+- Return the top 5 matches with similarity greater than or equal to 0.45.
 - Use local Ollama to generate the final answer from the retrieved context.
 - Return both the generated response and the matched QA records.
+- Support multiple vector database backends, including PostgreSQL with pgvector and ChromaDB.
+- Load the active vector database implementation from environment configuration at startup.
 
 ## 4. Data Model
 A QA record should include:
@@ -57,7 +59,7 @@ Search endpoint rules:
 - Accept raw question text as input
 - Convert the query to an embedding
 - Compare against stored question embeddings using cosine similarity
-- Return only matches with score at or above 0.85
+- Return only matches with score at or above 0.45
 - Return at most 5 results
 
 RAG endpoint rules:
@@ -67,6 +69,7 @@ RAG endpoint rules:
 
 ## 6. Configuration Requirements
 The project must support configuration for:
+- Vector database backend selection
 - Embedding model name
 - Embedding dimension
 - Ollama base URL
@@ -80,6 +83,10 @@ The project must support configuration for:
 - PostgreSQL schema
 
 Configuration should be environment-variable driven, with sensible local defaults.
+Recommended backend configuration:
+- Use `VECTOR_DB_BACKEND` to select the active vector store implementation.
+- Support at least `postgresql` and `chromadb` values.
+- Default to `postgresql` when no backend is specified.
 
 ## 7. Non-Functional Requirements
 - Designed for local development on macOS
