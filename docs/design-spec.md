@@ -6,9 +6,10 @@ Build a simple FastAPI service that stores question-answer pairs in PostgreSQL a
 ## 2. Goals
 - Provide CRUD operations for QA pairs.
 - Support question search by semantic similarity.
-- Return the top 5 matches when similarity is at least 0.85.
+- Return the top 5 matches when similarity is at least 0.45.
 - Generate a final response with local Ollama using retrieved QA context.
 - Keep the implementation small, local-first, and easy to run with `uv`.
+- Allow the vector database backend to be selected from environment configuration at startup.
 
 ## 3. Out of Scope
 - Authentication and authorization.
@@ -21,7 +22,7 @@ Build a simple FastAPI service that stores question-answer pairs in PostgreSQL a
 The service is organized into four layers:
 - API layer: FastAPI routers and request/response models.
 - Service layer: embedding, retrieval, and RAG orchestration.
-- Data layer: PostgreSQL access with pgvector support.
+- Data layer: environment-selected vector store implementation, such as PostgreSQL with pgvector or ChromaDB.
 - Integration layer: sentence-transformers for embeddings and Ollama for generation.
 
 ## 5. Request Flow
@@ -36,7 +37,7 @@ The service is organized into four layers:
 1. Client submits a question string.
 2. Service converts the query into an embedding.
 3. Data layer performs vector similarity search in PostgreSQL.
-4. Results are filtered to cosine similarity greater than or equal to 0.85.
+4. Results are filtered to cosine similarity greater than or equal to 0.45.
 5. The top 5 matches are returned.
 
 ### 5.3 RAG flow
@@ -72,7 +73,7 @@ Design rules:
 ### 7.2 Search endpoint
 - Input: raw question text
 - Output: up to 5 matching QA pairs
-- Rule: cosine similarity must be at least 0.85
+- Rule: cosine similarity must be at least 0.45
 
 ### 7.3 RAG endpoint
 - Input: raw question text
@@ -81,6 +82,7 @@ Design rules:
 
 ## 8. Configuration
 Configuration should be environment-variable driven and grouped into three areas:
+- Vector database backend selection
 - Embedding config: model name, embedding dimension
 - Ollama config: base URL, model name, generation settings
 - PostgreSQL config: host, port, database, username, password, schema
@@ -89,6 +91,7 @@ Recommended config behavior:
 - Provide local defaults for development.
 - Keep sensitive values out of source control.
 - Make the embedding model and Ollama model selectable without code changes.
+- Load the active vector database implementation from environment configuration at startup.
 
 ## 9. Non-Functional Requirements
 - Local development on macOS.
