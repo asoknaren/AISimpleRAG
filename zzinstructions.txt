@@ -1,72 +1,16 @@
+AISimpleRAG quick commands
 
-#-------- VIRTUAL ENVIRONMENT ------------------------
-
-py -m venv .venv
-python3 -m venv .venv
-
------Activate----- 
-.venv\Scripts\Activate.ps1  ------- windows
-source .venv/bin/activate   ------- mac
-
-uv init
-
+Install deps:
 uv sync
 
-uv add ??
+Run API:
+uv run python main.py
 
-deactivate
+Run tests:
+uv run pytest -q
 
-#-------- VIRTUAL ENVIRONMENT ------------------------
+Open API docs:
+http://127.0.0.1:8000/docs
 
-git remote add origin https://github.com/asoknaren/??.git
-git remote -v
-
-git remote set-url origin https://github.com/asoknaren/??.git
-git remote -v
-
-#-------- LOCAL TESTING --------------------------------
-
-# Terminal 1 – API
-uv run python bug_employee_api.py
-
-# Terminal 2 – Streamlit UI
-uv run streamlit run bug_frontendui.py
-
-
-#-------- FastAPI RUN COMMANDS -----------------------
-# Build
-docker build -f Dockerfile.bug-api -t bug-employee-api .
-
-# Run
-docker run -p 8001:8001 bug-employee-api
-
-#Frontend Build
-docker build -f Dockerfile.bug-frontend -t bug-frontend-ui .
-
-
-#runtime*** steps
-docker network create bug-app-net
-
-docker run -d --name bug-employee-api --network bug-app-net -p 8001:8001 bug-employee-api
-
-docker run -d --name bug-frontend-ui -p 8501:8501 \
-  -e API_BASE_URL=http://host.docker.internal:8001 \
-  bug-frontend-ui
-
-#--------------- DOCKER DEPLOYMENT -------------------------
-
-docker compose up --build -d
-
-# See running containers
-docker compose ps
-
-# View logs
-docker compose logs -f
-
-# Stop and remove containers
-docker compose down
-
-#------------------------------------------------------------
-docker build -t testwebfastapi:latest .
-
-docker run -d --name testwebfastapi-app -p 8505:8505 testwebfastapi:latest
+Configuration:
+Use environment variables described in README.md.
