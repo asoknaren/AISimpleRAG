@@ -9,6 +9,7 @@
 ## Phase 1: Project Setup
 - [x] Add core dependencies to `pyproject.toml`.
 - [x] Create a settings/config module for embedding, Ollama, and PostgreSQL values.
+- [x] Add a `VECTOR_DB_BACKEND` configuration option with a safe default.
 - [x] Add a reusable logging setup.
 - [x] Create the package/module layout for API, services, and database code.
 
@@ -18,12 +19,15 @@
 - [x] Create database connection and session utilities.
 - [x] Implement insert, update, delete, and fetch operations for QA records.
 - [x] Implement vector search against the QA table.
+- [x] Introduce a vector-store abstraction that can route to PostgreSQL or ChromaDB.
+- [x] Implement the ChromaDB-backed vector store adapter.
+- [x] Implement backend selection during app startup based on environment configuration.
 
 ## Phase 3: Embeddings and Retrieval
 - [x] Load the sentence-transformer model.
 - [x] Implement question embedding generation.
 - [x] Recompute embeddings when the question text changes.
-- [x] Implement cosine similarity filtering with a minimum score of 0.85.
+- [x] Implement cosine similarity filtering with a minimum score configured for practical QA retrieval.
 - [x] Return at most 5 matches from search.
 
 ## Phase 4: API Layer
@@ -48,9 +52,12 @@
 - [x] Add tests for top-5 search limits.
 - [x] Add tests for embedding regeneration on question updates.
 - [x] Add tests for RAG response structure.
+- [x] Add tests that verify the configured backend is selected from environment settings.
+- [x] Add tests for ChromaDB-backed retrieval behavior.
 
 ## Phase 7: Documentation and Cleanup
 - [x] Update `README.md` with setup and run instructions.
 - [x] Document environment variables and defaults.
+- [x] Document the vector database backend selector and supported values.
 - [x] Remove or replace any outdated scratch notes.
 - [x] Verify the project runs cleanly end to end.

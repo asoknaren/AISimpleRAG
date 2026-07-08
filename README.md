@@ -55,9 +55,12 @@ The application is configured via environment variables (also documented in `.en
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `VECTOR_DB_BACKEND` | `postgresql` | Active vector database implementation (`postgresql` or `chromadb`) |
+| `CHROMA_PERSIST_DIRECTORY` | `.chroma` | Local persistence directory used when `VECTOR_DB_BACKEND=chromadb` |
+| `CHROMA_COLLECTION_NAME` | `qa_records` | ChromaDB collection name used for QA records |
 | `EMBEDDING_MODEL_NAME` | `sentence-transformers/all-MiniLM-L6-v2` | Sentence-transformer model used to embed question text |
 | `EMBEDDING_DIMENSION` | `384` | Vector dimension stored in pgvector |
-| `SEARCH_MIN_SCORE` | `0.85` | Minimum cosine similarity score for search results |
+| `SEARCH_MIN_SCORE` | `0.45` | Minimum cosine similarity score for search results |
 | `SEARCH_TOP_K` | `5` | Maximum number of retrieved matches |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL |
 | `OLLAMA_MODEL_NAME` | `llama3.1:8b` | Ollama model used for generation |
@@ -92,3 +95,20 @@ uv run pytest -q
 
 - On startup, the app attempts to create the `vector` extension (`CREATE EXTENSION IF NOT EXISTS vector`) and creates schema/tables if missing.
 - If Ollama is unavailable, the RAG service returns a deterministic fallback answer based on retrieved context.
+
+
+## Test questions you can ask for this topic:
+Input Question: how a normalized vector maintains a same meaning as a full vector ?
+
+- What is the difference between a normalized vector and a full vector?
+- Why is vector normalization used in semantic search?
+- Does normalization change the meaning of an embedding or only its scale?
+- How does cosine similarity relate to normalized vectors?
+- What information is lost when a vector is normalized?
+- Can two vectors with different lengths become identical after normalization?
+- Why is direction more important than magnitude in embedding comparison?
+- When would normalization be a bad idea?
+- How do normalized vectors help compare text meaning?
+- What does it mean if two normalized vectors have a cosine similarity near 1?
+- What does it mean if two normalized vectors have a cosine similarity near 0?
+- How would normalization affect retrieval in a vector database?

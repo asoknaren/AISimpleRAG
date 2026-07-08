@@ -20,5 +20,5 @@ def test_retrieve_matches_uses_default_threshold_and_top_k(monkeypatch: pytest.M
     retrieval.retrieve_matches(object(), question="hello")
 
     assert captured["query_embedding"] == [0.25, 0.75]
-    assert captured["min_score"] == 0.85
+    assert captured["min_score"] == 0.45
     assert captured["top_k"] == 5
