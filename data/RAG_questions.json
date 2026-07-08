@@ -1,0 +1,92 @@
+[
+  {
+    "question": "What is the architectural difference between an Encoder-only model (e.g., SBERT) and a Decoder-only Instruct model (e.g., Llama-3-Instruct)?",
+    "answer": "Encoder models use bidirectional attention, allowing every token to view context both to its left and right simultaneously to compress text sequences into fixed dense vectors. Decoder-only Instruct models use causal masked attention, restricting tokens to looking only backward at preceding context to autoregressively generate new tokens one-by-one, and are fine-tuned via instruction pairs to align with human commands.",
+    "user_queries": [
+      "difference between encoder only and decoder only transformer architectures",
+      "how does bidirectional attention in sbert compare to causal attention in llama",
+      "why use encoder models for embeddings vs decoder models for generation"
+    ]
+  },
+  {
+    "question": "In a Multi-Modal RAG pipeline using CLIP, can you perform a text-based search over an image database without text metadata or captions? How?",
+    "answer": "Yes. CLIP projects both images and text into a shared geometric vector space. During ingestion, raw image pixels pass through the Vision Encoder to yield an embedding stored in a vector database. During search, the text query passes through the Text Encoder. Because their mathematical spaces are perfectly aligned, a simple Cosine Similarity calculation can compare the text vector against the stored image vectors to find the closest matches.",
+    "user_queries": [
+      "how to build multi-modal visual rag using clip and vector database",
+      "can i search image embeddings using natural language text queries",
+      "cross-modal retrieval step by step guide using clip text and vision encoders"
+    ]
+  },
+  {
+    "question": "Why did AlexNet (2012) spark the modern deep learning revolution if convolutional neural networks like LeNet-5 already existed in 1998?",
+    "answer": "While LeNet-5 introduced the foundational alternating convolutional and pooling layer architecture, it was constrained by 1998 compute limitations to low-resolution grayscale digits. AlexNet scaled this concept exponentially to process high-resolution color images by leveraging parallelization on NVIDIA GPUs using CUDA, swapping sluggish tanh activations for ReLU to mitigate vanishing gradients, and using Dropout regularization to prevent overfitting.",
+    "user_queries": [
+      "architectural comparison between lenet-5 and alexnet convolutional layers",
+      "why did alexnet succeed in the 2012 imagenet competition over classical methods",
+      "the historical impact of gpu parallelization and relu activation on deep learning"
+    ]
+  },
+  {
+    "question": "What is the fundamental operational difference between Document AI engines like docTR and Donut?",
+    "answer": "docTR follows a Two-Stage Cascaded OCR approach, using a segmentation network (like DBNet) to extract explicit 2D bounding boxes and routing those pixel crops to a text transcriber (like CRNN) to return text with layout coordinates. Donut is an End-to-End OCR-Free Document Transformer that drops bounding boxes entirely, using a visual Swin Transformer coupled to a BART text decoder to translate raw page pixels directly into a structured string like JSON.",
+    "user_queries": [
+      "cascaded two stage ocr vs ocr free document transformer models",
+      "how does mindee doctr layout extraction compare to naver donut base model",
+      "extracting structured json directly from document images using end to end neural networks"
+    ]
+  },
+  {
+    "question": "How does the sentence-transformers library differ from the core Hugging Face transformers library when extracting sentence embeddings?",
+    "answer": "The core transformers library outputs token-level embeddings (a matrix of dense vectors representing each individual word token), requiring developers to write custom mathematical pooling logic manually to collapse them. The sentence-transformers library is an optimized wrapper for Bi-Encoder architectures that automatically handles tokenization, forward passes, and pooling math out of the box to return a single sequence-level vector.",
+    "user_queries": [
+      "token level embeddings vs sequence level embeddings huggingface",
+      "why do i need manual pooling layers with raw bert models in python",
+      "advantages of using sbert bi-encoder over classical cross-encoders for retrieval"
+    ]
+  },
+  {
+    "question": "What is the 'Contextual Blindness' limitation of legacy vectorization models like Word2Vec compared to modern Transformer-based encoders?",
+    "answer": "Word2Vec generates context-independent embeddings, mapping a word to exactly one static vector in its vocabulary dictionary regardless of how it is used (e.g., the word 'bank' in 'river bank' and 'investment bank' shares an identical vector). Modern Transformers use Self-Attention mechanisms to evaluate the entire sentence simultaneously, allowing the generated token embedding to dynamically shift depending on surrounding context.",
+    "user_queries": [
+      "context independent word2vec embeddings vs context dependent transformer tokens",
+      "how self attention solves the polysemy problem for identical words in sentence processing",
+      "why bag of words and static word vectors fail to capture syntax and grammar nuances"
+    ]
+  },
+  {
+    "question": "When architecting an LLM orchestration application, does LangChain explicitly require the installation and runtime use of the Python transformers library?",
+    "answer": "No. LangChain is an agnostic orchestration layer that handles routing between components. It can operate entirely by passing API payloads over HTTP to managed cloud providers like OpenAI or Anthropic without local model execution frameworks. It can also bind to optimized C/C++ local inference backends like Ollama or Llama.cpp, bypassing the local hardware footprint of PyTorch and the Python transformers library.",
+    "user_queries": [
+      "running local rag pipelines with langchain using ollama instead of pytorch",
+      "is huggingface transformers framework a strict dependency for langchain applications",
+      "how to configure cloud based llm providers inside langchain orchestration projects"
+    ]
+  },
+  {
+    "question": "What is Google DeepMind's Tracr tool, and how does it serve the field of Mechanistic Interpretability?",
+    "answer": "Tracr is a compiler for Transformers. Instead of training a model using data and gradient descent, an engineer writes a deterministic algorithm in a specialized language called RASP (e.g., token reversing or counting). Tracr compiles that logic straight into the exact weight matrices of a functional Transformer, giving researchers a perfectly transparent model sandbox where the exact circuit function of every layer and neuron is mathematically known.",
+    "user_queries": [
+      "deepmind tracr compiler translating rasp code to transformer weight matrices",
+      "how to use compiled transformers for testing mechanistic interpretability tools",
+      "reverse engineering neural networks using ground truth model weights from tracr"
+    ]
+  },
+  {
+    "question": "For what data types and operational constraints should you choose Scikit-Learn over PyTorch?",
+    "answer": "Choose Scikit-Learn when dealing with structured tabular data (SQL tables, CSVs) requiring classical machine learning algorithms (like Random Forests or Gradient Boosting) or unsupervised clustering, as it is highly efficient on standard CPUs with an interpretable API. Choose PyTorch when dealing with massive, unstructured data grids (images, video, raw audio, natural language streams) that require heavy matrix parallelization on GPUs via deep neural networks.",
+    "user_queries": [
+      "when to use classical scikit learn algorithms vs deep learning neural networks",
+      "processing tabular databases on cpu with sklearn vs unstructured images on gpu with pytorch",
+      "machine learning model explainability compliance constraints scikit-learn vs deep learning"
+    ]
+  },
+  {
+    "question": "Why is the safetensors format considered a vital security upgrade over traditional PyTorch .bin or .pt checkpoints on the Hugging Face Hub?",
+    "answer": "Traditional PyTorch checkpoints use Python's native pickle utility to serialize data, which introduces a critical supply-chain vulnerability because loading a pickle file can execute arbitrary code on the host machine. The safetensors format completely eliminates this risk by storing zero executable code—containing only a clean JSON header and raw tensor numbers—while enabling zero-copy memory mapping for faster model loading speeds.",
+    "user_queries": [
+      "pytorch pickle deserialization vulnerabilities and arbitrary code execution risks",
+      "how safetensors prevents supply chain attacks on huggingface model hub repositories",
+      "performance comparison zero copy memory mapping safetensors vs traditional bin files"
+    ]
+  }
+]

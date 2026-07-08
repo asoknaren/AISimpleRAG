@@ -28,6 +28,12 @@ uv sync
 2. Create a `.env` file (or copy from `.env.example`) and adjust values as needed.
 
 3. Ensure PostgreSQL is available and has `pgvector` support.
+CREATE EXTENSION IF NOT EXISTS vector;
+
+using postgreSQL 17 version for testing
+
+or use docker - 
+docker run --name simplerag-db  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres$#$ -e POSTGRES_DB=aisimpleragtest -p 5434:5432 -v simplerag_data:/var/lib/postgresql/data -d pgvector/pgvector:pg17
 
 4. Start Ollama and pull a model if needed:
 

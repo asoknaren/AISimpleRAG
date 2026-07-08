@@ -12,15 +12,21 @@ def _fallback_answer(question: str, matches: list[tuple[QARecord, float]]) -> st
             "No relevant QA context met the configured similarity threshold. "
             "Try rephrasing the question."
         )
-    return matches[0][0].answer
+    top_match = matches[0][0]
+    return (
+        f"Answer: Based on the closest stored QA, {top_match.answer}\n"
+        "Additional context:\n"
+        "- This response was generated from retrieval fallback because the LLM generator was unavailable.\n"
+        "- Start or verify Ollama to receive a fuller synthesized explanation tailored to your exact wording."
+    )
 
 
 def _build_prompt(question: str, matches: list[tuple[QARecord, float]]) -> str:
     if not matches:
         return (
-            "You are a concise QA assistant. "
-            "No supporting context was retrieved with the configured threshold. "
-            "Answer the user honestly and suggest rephrasing if uncertain.\n\n"
+            "You are a QA assistant. "
+            "Answer the user's question directly, then add 1-2 short points of helpful background context. "
+            "Do not copy source text verbatim.\n\n"
             f"User question:\n{question}\n"
         )
 
@@ -34,11 +40,18 @@ def _build_prompt(question: str, matches: list[tuple[QARecord, float]]) -> str:
 
     context_text = "\n\n".join(context_lines)
     return (
-        "You are a concise QA assistant. Use only the retrieved QA context below. "
-        "If context is insufficient, clearly say so.\n\n"
+        "You are a concise QA assistant. Use the retrieved QA context below as grounding, but synthesize a fresh answer in your own words. "
+        "Do not copy any retrieved answer sentence verbatim unless quoting is explicitly needed. "
+        "After the direct answer, add a short 'Additional context' section with 1-2 useful facts relevant to the user's question. "
+        "If context is insufficient, clearly say what is missing.\n\n"
         f"Retrieved context:\n{context_text}\n\n"
         f"User question:\n{question}\n\n"
-        "Final answer:"
+
+        #"Return exactly this format:\n"
+        #"Answer: <direct answer>\n"
+        #"Additional context:\n"
+        #"- <fact 1>\n"
+        #"- <fact 2 if useful>"
     )
 
 
