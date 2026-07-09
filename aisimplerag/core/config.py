@@ -1,5 +1,6 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
 
 
 class Settings(BaseSettings):
@@ -34,11 +35,14 @@ class Settings(BaseSettings):
     postgres_schema: str = Field(default="public", validation_alias="POSTGRES_SCHEMA")
 
     @property
-    def database_url(self) -> str:
-        return (
-            "postgresql+psycopg://"
-            f"{self.postgres_user}:{self.postgres_password}"
-            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+    def database_url(self) -> URL:
+        return URL.create(
+            "postgresql+psycopg",
+            username=self.postgres_user,
+            password=self.postgres_password,
+            host=self.postgres_host,
+            port=self.postgres_port,
+            database=self.postgres_db,
         )
 
 

@@ -33,7 +33,17 @@ CREATE EXTENSION IF NOT EXISTS vector;
 using postgreSQL 17 version for testing
 
 or use docker - 
-docker run --name simplerag-db  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres$#$ -e POSTGRES_DB=aisimpleragtest -p 5434:5432 -v simplerag_data:/var/lib/postgresql/data -d pgvector/pgvector:pg17
+docker run --name simplerag-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD='postgres$#$' -e POSTGRES_DB=aisimpleragtest -p 5434:5432 -v simplerag_data:/var/lib/postgresql/data -d pgvector/pgvector:pg17
+
+If you use the Docker command above, set matching values in `.env`:
+
+```env
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5434
+POSTGRES_DB=aisimpleragtest
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres$#$
+```
 
 4. Start Ollama and pull a model if needed:
 
