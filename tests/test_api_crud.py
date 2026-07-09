@@ -13,6 +13,7 @@ class FakeQARecord:
         self.id = qa_id
         self.question = question
         self.answer = answer
+        self.question_embedding = [0.1, 0.2]
         self.created_at = now
         self.updated_at = now
 
@@ -79,5 +80,6 @@ def test_get_and_list_qa_endpoints(client: TestClient, monkeypatch: pytest.Monke
 
     assert get_response.status_code == 200
     assert get_response.json()["id"] == 1
+    assert get_response.json()["question_embedding"] == [0.1, 0.2]
     assert list_response.status_code == 200
     assert len(list_response.json()) == 2

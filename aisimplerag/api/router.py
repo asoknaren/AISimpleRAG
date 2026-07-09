@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from aisimplerag.api.schemas import (
     QACreateRequest,
+    QADetailResponse,
     QAResponse,
     QAUpdateRequest,
     RAGRequest,
@@ -74,12 +75,12 @@ def delete_qa_endpoint(qa_id: int, db: Session = Depends(get_db)) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@api_router.get("/qa/{qa_id}", response_model=QAResponse, tags=["qa"])
-def get_qa_endpoint(qa_id: int, db: Session = Depends(get_db)) -> QAResponse:
+@api_router.get("/qa/{qa_id}", response_model=QADetailResponse, tags=["qa"])
+def get_qa_endpoint(qa_id: int, db: Session = Depends(get_db)) -> QADetailResponse:
     record = get_qa_by_id(db, qa_id)
     if record is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="QA record not found.")
-    return QAResponse.model_validate(record)
+    return QADetailResponse.model_validate(record)
 
 
 @api_router.get("/qa", response_model=list[QAResponse], tags=["qa"])

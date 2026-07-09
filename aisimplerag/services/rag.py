@@ -1,8 +1,10 @@
 from sqlalchemy.orm import Session
 
 from aisimplerag.api.schemas import RAGResponse, SearchMatch
+from aisimplerag.core.config import settings
 from aisimplerag.db.models.qa import QARecord
 from aisimplerag.services.ollama import generate_with_ollama
+from aisimplerag.services.openai import generate_with_openai
 from aisimplerag.services.retrieval import retrieve_matches
 
 
@@ -13,11 +15,16 @@ def _fallback_answer(question: str, matches: list[tuple[QARecord, float]]) -> st
             "Try rephrasing the question."
         )
     top_match = matches[0][0]
+    provider_hint = (
+        "Verify OpenAI credentials and endpoint configuration in environment variables."
+        if settings.use_openai
+        else "Start or verify Ollama to receive a fuller synthesized explanation tailored to your exact wording."
+    )
     return (
         f"Answer: Based on the closest stored QA, {top_match.answer}\n"
         "Additional context:\n"
         "- This response was generated from retrieval fallback because the LLM generator was unavailable.\n"
-        "- Start or verify Ollama to receive a fuller synthesized explanation tailored to your exact wording."
+        f"- {provider_hint}"
     )
 
 
@@ -59,9 +66,12 @@ def build_rag_response(db: Session, *, question: str) -> RAGResponse:
     matches = retrieve_matches(db, question=question)
     prompt = _build_prompt(question, matches)
     try:
-        generated_answer = generate_with_ollama(prompt=prompt)
+        if settings.use_openai:
+            generated_answer = generate_with_openai(prompt=prompt)
+        else:
+            generated_answer = generate_with_ollama(prompt=prompt)
     except Exception:
-        # Keep the API responsive if Ollama is unavailable.
+        # Keep the API responsive if the configured generator is unavailable.
         generated_answer = _fallback_answer(question, matches)
 
     return RAGResponse(

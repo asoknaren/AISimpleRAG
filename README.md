@@ -1,13 +1,13 @@
 # AISimpleRAG
 
-Simple local-first QA RAG service built with FastAPI, PostgreSQL + pgvector, sentence-transformers, and Ollama.
+Simple QA RAG service built with FastAPI, PostgreSQL + pgvector, and pluggable local/OpenAI inference.
 
 ## Features
 
 - CRUD operations for QA pairs.
 - Semantic search with cosine similarity thresholding.
 - Top-k retrieval (default 5 matches).
-- Retrieval-augmented answer generation through local Ollama.
+- Retrieval-augmented answer generation via local (`sentence-transformers` + Ollama) or OpenAI mode.
 - Test suite for CRUD, retrieval constraints, embedding regeneration, and RAG response shape.
 
 ## Prerequisites
@@ -15,7 +15,8 @@ Simple local-first QA RAG service built with FastAPI, PostgreSQL + pgvector, sen
 - Python 3.10+
 - `uv`
 - PostgreSQL 14+ with `pgvector` extension available
-- Ollama running locally (default: `http://localhost:11434`)
+- For local mode: Ollama running locally (default: `http://localhost:11434`)
+- For OpenAI mode: valid OpenAI API key and network access to configured endpoint
 
 ## Quick Start
 
@@ -65,16 +66,23 @@ The application is configured via environment variables (also documented in `.en
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `AI_PROVIDER` | `local` | Inference provider (`local` uses sentence-transformers + Ollama, `openai` uses OpenAI for embeddings and generation) |
 | `VECTOR_DB_BACKEND` | `postgresql` | Active vector database implementation (`postgresql` or `chromadb`) |
 | `CHROMA_PERSIST_DIRECTORY` | `.chroma` | Local persistence directory used when `VECTOR_DB_BACKEND=chromadb` |
 | `CHROMA_COLLECTION_NAME` | `qa_records` | ChromaDB collection name used for QA records |
-| `EMBEDDING_MODEL_NAME` | `sentence-transformers/all-MiniLM-L6-v2` | Sentence-transformer model used to embed question text |
+| `EMBEDDING_MODEL_NAME` | `sentence-transformers/all-MiniLM-L6-v2` | Local sentence-transformer model used when `AI_PROVIDER=local` |
 | `EMBEDDING_DIMENSION` | `384` | Vector dimension stored in pgvector |
 | `SEARCH_MIN_SCORE` | `0.45` | Minimum cosine similarity score for search results |
 | `SEARCH_TOP_K` | `5` | Maximum number of retrieved matches |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL |
-| `OLLAMA_MODEL_NAME` | `llama3.1:8b` | Ollama model used for generation |
-| `OLLAMA_TIMEOUT_SECONDS` | `30.0` | HTTP timeout for Ollama requests |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL used when `AI_PROVIDER=local` |
+| `OLLAMA_MODEL_NAME` | `llama3.1:8b` | Ollama model used for generation when `AI_PROVIDER=local` |
+| `OLLAMA_TIMEOUT_SECONDS` | `30.0` | HTTP timeout for Ollama requests when `AI_PROVIDER=local` |
+| `OPENAI_API_KEY` | `` | API key used when `AI_PROVIDER=openai` |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible API base URL |
+| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model used when `AI_PROVIDER=openai` |
+| `OPENAI_GENERATION_MODEL` | `gpt-4o-mini` | Chat/completion model used when `AI_PROVIDER=openai` |
+| `OPENAI_TIMEOUT_SECONDS` | `30.0` | HTTP timeout for OpenAI requests |
+| `OPENAI_MAX_TOKENS` | `400` | Maximum output tokens requested from OpenAI chat completions |
 | `POSTGRES_HOST` | `127.0.0.1` | PostgreSQL host |
 | `POSTGRES_PORT` | `5432` | PostgreSQL port |
 | `POSTGRES_DB` | `aisimplerag` | Database name |
@@ -104,7 +112,8 @@ uv run pytest -q
 ## Notes
 
 - On startup, the app attempts to create the `vector` extension (`CREATE EXTENSION IF NOT EXISTS vector`) and creates schema/tables if missing.
-- If Ollama is unavailable, the RAG service returns a deterministic fallback answer based on retrieved context.
+- If the configured generator is unavailable (Ollama or OpenAI), the RAG service returns a deterministic fallback answer based on retrieved context.
+- `EMBEDDING_DIMENSION` must match the embedding size written to pgvector. In OpenAI mode with `text-embedding-3-*` models, the app requests this exact dimension from OpenAI so local and OpenAI providers can share one vector schema.
 
 
 ## Test questions you can ask for this topic:

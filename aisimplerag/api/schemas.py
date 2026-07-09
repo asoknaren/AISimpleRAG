@@ -27,6 +27,10 @@ class QAResponse(BaseModel):
     updated_at: datetime
 
 
+class QADetailResponse(QAResponse):
+    question_embedding: list[float]
+
+
 class SearchRequest(BaseModel):
     question: str = Field(min_length=1)
 

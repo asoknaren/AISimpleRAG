@@ -20,6 +20,7 @@ class StoredQARecord:
 	id: int
 	question: str
 	answer: str
+	question_embedding: list[float]
 	created_at: datetime
 	updated_at: datetime
 
@@ -69,6 +70,7 @@ def _record_from_orm(record: QARecord) -> StoredQARecord:
 		id=record.id,
 		question=record.question,
 		answer=record.answer,
+		question_embedding=[float(value) for value in record.question_embedding],
 		created_at=record.created_at,
 		updated_at=record.updated_at,
 	)
@@ -279,6 +281,7 @@ class ChromaQAStore:
 		qa_id: int,
 		question: str,
 		answer: str,
+		question_embedding: Sequence[float] | None,
 		created_at: str | datetime,
 		updated_at: str | datetime,
 	) -> StoredQARecord:
@@ -290,6 +293,7 @@ class ChromaQAStore:
 			id=qa_id,
 			question=question,
 			answer=answer,
+			question_embedding=[float(value) for value in (question_embedding or [])],
 			created_at=created_at,
 			updated_at=updated_at,
 		)
@@ -314,36 +318,40 @@ class ChromaQAStore:
 			metadatas=[{"answer": answer, "created_at": now, "updated_at": now}],
 			embeddings=[[float(value) for value in question_embedding]],
 		)
-		return self._build_record(qa_id, question, answer, now, now)
+		return self._build_record(qa_id, question, answer, question_embedding, now, now)
 
 	def get_qa_by_id(self, qa_id: int) -> StoredQARecord | None:
 		collection = self._get_collection()
-		result = collection.get(ids=[str(qa_id)], include=["documents", "metadatas"])
+		result = collection.get(ids=[str(qa_id)], include=["documents", "metadatas", "embeddings"])
 		if not result.get("ids"):
 			return None
 		return self._build_record(
 			qa_id,
 			result["documents"][0],
 			result["metadatas"][0]["answer"],
+			(result.get("embeddings") or [None])[0],
 			result["metadatas"][0]["created_at"],
 			result["metadatas"][0]["updated_at"],
 		)
 
 	def list_qa(self, *, limit: int = 100, offset: int = 0) -> list[StoredQARecord]:
 		collection = self._get_collection()
-		result = collection.get(include=["documents", "metadatas"])
+		result = collection.get(include=["documents", "metadatas", "embeddings"])
+		embeddings = result.get("embeddings", [None] * len(result.get("ids", [])))
 		records = [
 			self._build_record(
 				int(qa_id),
 				document,
 				metadata["answer"],
+				embedding,
 				metadata["created_at"],
 				metadata["updated_at"],
 			)
-			for qa_id, document, metadata in zip(
+			for qa_id, document, metadata, embedding in zip(
 				result.get("ids", []),
 				result.get("documents", []),
 				result.get("metadatas", []),
+				embeddings,
 				strict=False,
 			)
 		]
@@ -380,7 +388,15 @@ class ChromaQAStore:
 		if updated_embedding is not None:
 			update_kwargs["embeddings"] = [[float(value) for value in updated_embedding]]
 		collection.update(**update_kwargs)
-		return self._build_record(qa_id, updated_question, updated_answer, record.created_at, now)
+		current_embedding = updated_embedding if updated_embedding is not None else record.question_embedding
+		return self._build_record(
+			qa_id,
+			updated_question,
+			updated_answer,
+			current_embedding,
+			record.created_at,
+			now,
+		)
 
 	def delete_qa(self, qa_id: int) -> bool:
 		collection = self._get_collection()
@@ -403,17 +419,21 @@ class ChromaQAStore:
 		result = collection.query(
 			query_embeddings=[[float(value) for value in query_embedding]],
 			n_results=max_results,
-			include=["documents", "metadatas", "distances"],
+			include=["documents", "metadatas", "distances", "embeddings"],
 		)
 		if not result.get("ids"):
 			return []
 
+		embedding_rows = result.get("embeddings")
+		row_embeddings = embedding_rows[0] if embedding_rows else [None] * len(result["ids"][0])
+
 		matches: list[tuple[StoredQARecord, float]] = []
-		for qa_id, document, metadata, distance in zip(
+		for qa_id, document, metadata, distance, embedding in zip(
 			result["ids"][0],
 			result["documents"][0],
 			result["metadatas"][0],
 			result["distances"][0],
+			row_embeddings,
 			strict=False,
 		):
 			similarity = 1.0 - float(distance)
@@ -425,6 +445,7 @@ class ChromaQAStore:
 						int(qa_id),
 						document,
 						metadata["answer"],
+						embedding,
 						metadata["created_at"],
 						metadata["updated_at"],
 					),
