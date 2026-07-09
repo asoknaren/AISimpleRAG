@@ -9,6 +9,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    ai_provider: str = Field(default="local", validation_alias="AI_PROVIDER")
+
     embedding_model_name: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         validation_alias="EMBEDDING_MODEL_NAME",
@@ -22,6 +24,16 @@ class Settings(BaseSettings):
     ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_BASE_URL")
     ollama_model_name: str = Field(default="llama3.1:8b", validation_alias="OLLAMA_MODEL_NAME")
     ollama_timeout_seconds: float = Field(default=30.0, validation_alias="OLLAMA_TIMEOUT_SECONDS")
+
+    openai_api_key: str = Field(default="", validation_alias="OPENAI_API_KEY")
+    openai_base_url: str = Field(default="https://api.openai.com/v1", validation_alias="OPENAI_BASE_URL")
+    openai_embedding_model: str = Field(
+        default="text-embedding-3-small",
+        validation_alias="OPENAI_EMBEDDING_MODEL",
+    )
+    openai_generation_model: str = Field(default="gpt-4o-mini", validation_alias="OPENAI_GENERATION_MODEL")
+    openai_timeout_seconds: float = Field(default=30.0, validation_alias="OPENAI_TIMEOUT_SECONDS")
+    openai_max_tokens: int = Field(default=400, validation_alias="OPENAI_MAX_TOKENS")
 
     chroma_persist_directory: str = Field(default=".chroma", validation_alias="CHROMA_PERSIST_DIRECTORY")
     chroma_collection_name: str = Field(default="qa_records", validation_alias="CHROMA_COLLECTION_NAME")
@@ -40,6 +52,10 @@ class Settings(BaseSettings):
             f"{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
+
+    @property
+    def use_openai(self) -> bool:
+        return self.ai_provider.strip().lower() == "openai"
 
 
 settings = Settings()
