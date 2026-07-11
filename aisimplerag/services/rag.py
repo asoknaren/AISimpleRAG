@@ -65,6 +65,8 @@ def _build_prompt(question: str, matches: list[tuple[QARecord, float]]) -> str:
 def build_rag_response(db: Session, *, question: str) -> RAGResponse:
     matches = retrieve_matches(db, question=question)
     prompt = _build_prompt(question, matches)
+
+    print(f"RAG prompt:\n{prompt}\n{'-'*40}")
     try:
         if settings.use_openai:
             generated_answer = generate_with_openai(prompt=prompt)
